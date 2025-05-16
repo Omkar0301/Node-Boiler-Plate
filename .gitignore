@@ -1,0 +1,23 @@
+# Environment files
+.env
+.env.*
+!.env.example  # Keep example files if you have them
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# IDE files
+.DS_Store
+.idea/
+.vscode/
+
+# Coverage
+coverage/
+
+# Other
+*.swp
+*.swo

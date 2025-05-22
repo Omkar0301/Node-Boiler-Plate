@@ -5,9 +5,14 @@ const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validation');
 const userValidation = require('../../validations/user.validation');
 
-router.get('/', auth('admin'), userController.getAllUsers);
-router.get('/:userId', auth(), validate(userValidation.getUser), userController.getUser);
-router.patch('/:userId', auth(), validate(userValidation.updateUser), userController.updateUser);
-router.delete('/:userId', auth(), validate(userValidation.deleteUser), userController.deleteUser);
+router.use(auth('admin'));
+
+router.route('/').post(validate(userValidation.listUsers), userController.getAllUsers);
+
+router
+  .route('/:userId')
+  .get(validate(userValidation.getUser), userController.getUser)
+  .patch(validate(userValidation.updateUser), userController.updateUser)
+  .delete(validate(userValidation.deleteUser), userController.deleteUser);
 
 module.exports = router;

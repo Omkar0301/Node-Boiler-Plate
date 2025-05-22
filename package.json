@@ -6,6 +6,7 @@
     "start": "cross-env NODE_ENV=production node src/app.js",
     "dev": "cross-env NODE_ENV=development nodemon src/app.js",
     "debug": "cross-env NODE_ENV=development nodemon --inspect src/app.js",
+    "git-reset-to-origin": "git fetch origin && git reset --hard @{u}",
     "test": "jest --coverage --detectOpenHandles",
     "test:watch": "jest --watch",
     "lint": "eslint .",

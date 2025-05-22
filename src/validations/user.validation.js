@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { queryParams } = require('./query.validation');
 
 const getUser = {
   params: Joi.object().keys({
@@ -22,8 +23,13 @@ const deleteUser = {
   })
 };
 
+const listUsers = {
+  query: queryParams
+};
+
 module.exports = {
   getUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  listUsers
 };

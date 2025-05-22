@@ -10,7 +10,7 @@ class UserRepository {
   }
 
   async getUserByEmail(email) {
-    return User.findOne({ email });
+    return User.findOne({ email }).select('+password');
   }
 
   async updateUser(id, updateData) {
@@ -19,6 +19,17 @@ class UserRepository {
 
   async deleteUser(id) {
     return User.findByIdAndDelete(id);
+  }
+
+  async queryUsers({ query = {}, sortBy = {}, skip = 0, limit = 10, populatePaths = [] }) {
+    let queryBuilder = User.find(query);
+    populatePaths.forEach((path) => {
+      queryBuilder = queryBuilder.populate(path);
+    });
+    const data = await queryBuilder.sort(sortBy).skip(skip).limit(limit).exec();
+    const total = await User.countDocuments(query);
+
+    return { total, users: data };
   }
 }
 

@@ -14,12 +14,40 @@ class UserService {
 
   async getUserById(id) {
     const user = await userRepository.getUserById(id);
+    if (!user) {
+      throw new ApiError(status.NOT_FOUND, 'User not found');
+    }
     return user;
   }
 
   async getUserByEmail(email) {
     const user = await userRepository.getUserByEmail(email);
+    if (!user) {
+      throw new ApiError(status.NOT_FOUND, 'User not found');
+    }
     return user;
+  }
+  async updateUser(id, updateData) {
+    if (updateData.password) {
+      updateData.password = await hashPassword(updateData.password);
+    }
+    const updatedUser = await userRepository.updateUser(id, updateData);
+    if (!updatedUser) {
+      throw new ApiError(status.NOT_FOUND, 'User not found');
+    }
+    return updatedUser;
+  }
+
+  async deleteUser(id) {
+    const deletedUser = await userRepository.deleteUser(id);
+    if (!deletedUser) {
+      throw new ApiError(status.NOT_FOUND, 'User not found');
+    }
+    return deletedUser;
+  }
+
+  async queryUsers(queryParams) {
+    return userRepository.queryUsers(queryParams);
   }
 }
 

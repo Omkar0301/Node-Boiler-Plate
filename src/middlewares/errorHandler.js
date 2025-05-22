@@ -2,6 +2,7 @@
 const logger = require('../utils/logger');
 const ApiError = require('../utils/ApiError');
 const { status } = require('http-status');
+const { sendError } = require('../utils/response');
 
 const errorConverter = (err, req, res, next) => {
   if (!(err instanceof ApiError)) {
@@ -13,20 +14,11 @@ const errorConverter = (err, req, res, next) => {
 };
 
 const errorHandler = (err, req, res, next) => {
-  const statusCode = err.statusCode || status.INTERNAL_SERVER_ERROR;
-  const message = err.message || status[statusCode];
-
-  res.locals.errorMessage = message;
-
-  const response = {
-    code: statusCode,
-    message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  };
+  res.locals.errorMessage = err.message;
 
   logger.error(err);
 
-  res.status(statusCode).json(response);
+  return sendError(res, err);
 };
 
 module.exports = {

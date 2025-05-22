@@ -17,7 +17,26 @@ const login = {
   })
 };
 
+const refreshTokens = {
+  body: Joi.object().keys({
+    refreshToken: Joi.string().optional()
+  })
+};
+
+const getMe = {
+  body: Joi.object().forbidden() // ensure no body is sent
+};
+
+const logout = {
+  body: Joi.object().keys({
+    refreshToken: Joi.string().optional()
+  })
+};
+
 module.exports = {
   register,
-  login
+  login,
+  refreshTokens,
+  getMe,
+  logout
 };

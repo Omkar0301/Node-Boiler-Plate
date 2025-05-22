@@ -7,8 +7,12 @@ const auth = require('../../middlewares/auth');
 
 router.post('/register', validate(authValidation.register), authController.register);
 router.post('/login', validate(authValidation.login), authController.login);
-router.post('/refresh-tokens', authController.refreshTokens);
-router.get('/me', auth(), authController.getMe);
-router.post('/logout', auth(), authController.logout);
+router.post(
+  '/refresh-tokens',
+  validate(authValidation.refreshTokens),
+  authController.refreshTokens
+);
+router.get('/me', auth(), validate(authValidation.getMe), authController.getMe);
+router.post('/logout', auth(), validate(authValidation.logout), authController.logout);
 
 module.exports = router;

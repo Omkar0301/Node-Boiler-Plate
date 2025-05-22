@@ -3,6 +3,7 @@ const authService = require('../../services/auth.service');
 const tokenService = require('../../services/token.service');
 const ApiError = require('../../utils/ApiError');
 const userService = require('../../services/user.service');
+const { sendSuccess } = require('../../utils/response');
 
 const authController = {
   /**
@@ -18,7 +19,13 @@ const authController = {
       const userResponse = { ...user.toObject() };
       delete userResponse.password;
 
-      res.status(status.CREATED).json({ user: userResponse });
+      return sendSuccess(
+        res,
+        'User created successfully',
+        { user: userResponse },
+        {},
+        status.CREATED
+      );
     } catch (error) {
       next(error);
     }
@@ -33,14 +40,8 @@ const authController = {
       const user = await authService.login(email, password);
       const tokens = await tokenService.generateAuthTokens(user);
 
-      // Set tokens in HTTP-only cookies
       tokenService.setTokenCookies(res, tokens);
-
-      // Optionally, omit sensitive data
-      const userResponse = { ...user.toObject() };
-      delete userResponse.password;
-
-      res.status(status.OK).json({ user: userResponse });
+      return sendSuccess(res, '', {}, {}, status.NO_CONTENT);
     } catch (error) {
       next(error);
     }
@@ -51,18 +52,17 @@ const authController = {
    */
   refreshTokens: async (req, res, next) => {
     try {
-      const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+      const refreshToken = req.cookies?.refreshToken;
 
       if (!refreshToken) {
-        throw new ApiError(status.BAD_REQUEST, 'Refresh token is missing');
+        throw new ApiError(status.BAD_REQUEST, 'Refresh token is missing. Please login again.');
       }
 
       const tokens = await authService.refreshAuthTokens(refreshToken);
 
-      // Set the new tokens in cookies
       tokenService.setTokenCookies(res, tokens);
 
-      res.status(status.OK).send();
+      return sendSuccess(res, 'Tokens refreshed successfully', tokens);
     } catch (error) {
       next(error);
     }
@@ -73,17 +73,15 @@ const authController = {
    */
   logout: async (req, res, next) => {
     try {
-      // Get refresh token from cookie
-      const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+      const refreshToken = req.cookies?.refreshToken;
 
       if (refreshToken) {
         await authService.logout(refreshToken);
       }
 
-      // Clear the cookies
       tokenService.clearTokenCookies(res);
 
-      res.status(status.NO_CONTENT).send();
+      return sendSuccess(res, '', {}, {}, status.NO_CONTENT);
     } catch (error) {
       next(error);
     }
@@ -97,15 +95,17 @@ const authController = {
       if (!req.user) {
         throw new ApiError(status.UNAUTHORIZED, 'Not authenticated');
       }
+
       const user = await userService.getUserById(req.user.id);
 
       if (!user) {
         throw new ApiError(status.NOT_FOUND, 'User not found');
       }
+
       const userResponse = { ...user.toObject() };
       delete userResponse.password;
 
-      res.status(status.OK).json({ user: userResponse });
+      return sendSuccess(res, 'User profile fetched successfully', { user: userResponse });
     } catch (error) {
       next(error);
     }

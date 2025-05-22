@@ -14,8 +14,12 @@
     "format": "prettier --write \"**/*.+(js|json)\"",
     "prepare": "husky install",
     "docker:build": "docker-compose build",
-    "docker:up": "docker-compose up",
-    "docker:down": "docker-compose down"
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:pull": "docker-compose pull",
+    "docker:recreate": "docker-compose up -d --force-recreate",
+    "docker:restart": "npm run docker:down && npm run docker:up",
+    "docker:update": "npm run docker:pull && npm run docker:recreate"
   },
   "keywords": [
     "nodejs",

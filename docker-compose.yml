@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    # build: . for using local build
+    image: omkar0301/node_js_boilerplate:latest
     ports:
       - '8081:8081'
     env_file:

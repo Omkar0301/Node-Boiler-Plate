@@ -27,6 +27,11 @@ class UserService {
     }
     return user;
   }
+
+  async findUserByEmail(email) {
+    return userRepository.getUserByEmail(email);
+  }
+
   async updateUser(id, updateData) {
     if (updateData.password) {
       updateData.password = await hashPassword(updateData.password);

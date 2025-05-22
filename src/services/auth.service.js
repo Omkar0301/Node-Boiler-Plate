@@ -10,7 +10,7 @@ class AuthService {
    * Register new user
    */
   async register(userData) {
-    if (await userService.getUserByEmail(userData.email)) {
+    if (await userService.findUserByEmail(userData.email)) {
       throw new ApiError(status.BAD_REQUEST, 'Email already taken');
     }
     return userService.createUser(userData);

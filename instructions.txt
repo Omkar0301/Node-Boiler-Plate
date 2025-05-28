@@ -1,0 +1,47 @@
+# Docker Compose Command Cheat Sheet
+# Usage: Copy and paste these commands directly into your terminal
+
+# ========================
+# Basic Operations
+# ========================
+
+# Start all services for an environment (dev/prod/staging)
+docker-compose --profile dev up -d
+
+# Stop all containers
+docker-compose down
+
+# Build a specific service
+docker-compose build app-dev
+
+# View logs
+docker-compose logs -f app-dev
+
+# ========================
+# Advanced Operations
+# ========================
+
+# Force recreate containers
+docker-compose --profile dev up -d --force-recreate
+
+# Pull latest images
+docker-compose pull app-dev
+
+# Restart services
+docker-compose down && docker-compose --profile dev up -d
+
+# Stop specific service
+docker-compose stop app-dev
+
+# List running containers
+docker-compose ps
+
+# ========================
+# Cleanup
+# ========================
+
+# Remove all containers + volumes
+docker-compose down -v
+
+# Remove orphan containers
+docker-compose down --remove-orphans

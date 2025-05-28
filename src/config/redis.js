@@ -13,10 +13,9 @@ if (config.redis.enabled) {
     database: config.redis.db
   };
 
-  if (config.redis.password) {
+  if (config.redis.password && config.redis.password.trim() !== '') {
     redisOptions.password = config.redis.password;
   }
-
   redisClient = redis.createClient(redisOptions);
 
   redisClient.on('error', (err) => {

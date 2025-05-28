@@ -1,28 +1,61 @@
-version: '3.8'
-
 services:
-  app:
-    # build: . for using local build
-    image: omkar0301/node_js_boilerplate:latest
+  # Development Profile
+  app-dev:
+    profiles: ["dev"]
+    command: npm run docker:dev
+    build: .
     ports:
-      - '8081:8081'
+      - "8081:8081"
     env_file:
       - .env.development
     depends_on:
       - mongo
       - redis
+    environment:
+      - NODE_ENV=development
 
+  # Production Profile
+  app-prod:
+    profiles: ["prod"]
+    command: npm run docker:prod
+    image: omkar0301/node_js_boilerplate:latest
+    ports:
+      - "8082:8082"
+    env_file:
+      - .env.production
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      - NODE_ENV=production
+
+  # Staging Profile
+  app-stage:
+    profiles: ["stage"]
+    command: npm run docker:stage
+    image: omkar0301/node_js_boilerplate:latest
+    ports:
+      - "8083:8083" 
+    env_file:
+      - .env.staging
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      - NODE_ENV=staging
+
+  # Shared Services
   mongo:
     image: mongo:latest
     ports:
-      - '27017:27017'
+      - "27017:27017"
     volumes:
       - mongo-data:/data/db
 
   redis:
     image: redis:latest
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis-data:/data
 

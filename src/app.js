@@ -8,12 +8,16 @@ const connectDB = require('./config/database');
 const config = require('./config');
 const { errorHandler, errorConverter } = require('./middlewares/errorHandler');
 const { apiLimiter } = require('./middlewares/rateLimiter');
+const { connectRedis } = require('./config/redis');
 
 const app = express();
 const PORT = config.port;
 
 // Connect to Database
 connectDB();
+
+// Connect to Redis service
+connectRedis();
 
 app.use(express.json());
 app.use(cookieParser());

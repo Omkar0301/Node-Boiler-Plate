@@ -95,9 +95,7 @@ const authController = {
       if (!req.user) {
         throw new ApiError(status.UNAUTHORIZED, 'Not authenticated');
       }
-
       const user = await userService.getUserById(req.user.id);
-
       if (!user) {
         throw new ApiError(status.NOT_FOUND, 'User not found');
       }

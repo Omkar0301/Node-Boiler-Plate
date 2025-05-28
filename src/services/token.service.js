@@ -3,6 +3,8 @@ const moment = require('moment');
 const config = require('../config');
 const tokenRepository = require('../repositories/token.repository');
 const constants = require('../utils/constants');
+const ApiError = require('../utils/ApiError');
+const { status } = require('http-status');
 
 class TokenService {
   /**
@@ -65,7 +67,7 @@ class TokenService {
     const payload = jwt.verify(token, config.jwt.secret);
     const tokenDoc = await tokenRepository.findToken(token, type);
     if (!tokenDoc || payload.type !== type) {
-      throw new Error('Token not found');
+      throw new ApiError(status.UNAUTHORIZED, 'Token not found');
     }
     return tokenDoc;
   }

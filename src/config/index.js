@@ -26,6 +26,21 @@ const development = {
   },
   tokenCleanup: {
     daysToKeep: process.env.TOKEN_CLEANUP_DAYS || 2
+  },
+  redis: {
+    enabled: process.env.REDIS_ENABLED === 'true',
+    host: process.env.REDIS_HOST || 'localhost',
+    port: process.env.REDIS_PORT || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
+    db: process.env.REDIS_DB || 0,
+    ttl: process.env.REDIS_TTL ? parseInt(process.env.REDIS_TTL) : 3600, // 1 hour in seconds
+    cluster: {
+      enabled: process.env.REDIS_CLUSTER_ENABLED === 'true',
+      hosts: process.env.REDIS_CLUSTER_HOSTS?.split(',') || [],
+      options: process.env.REDIS_CLUSTER_OPTIONS
+        ? JSON.parse(process.env.REDIS_CLUSTER_OPTIONS)
+        : {}
+    }
   }
 };
 

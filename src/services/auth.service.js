@@ -4,6 +4,9 @@ const ApiError = require('../utils/ApiError');
 const userService = require('./user.service');
 const tokenService = require('./token.service');
 const authRepository = require('../repositories/auth.repository');
+const cacheService = require('./cache.service');
+const config = require('../config');
+const logger = require('../utils/logger');
 
 class AuthService {
   /**
@@ -24,6 +27,9 @@ class AuthService {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new ApiError(status.UNAUTHORIZED, 'Incorrect email or password');
     }
+    await cacheService.set(`user:${user._id}`, user);
+    await cacheService.set(`user:email:${email}`, user);
+
     return user;
   }
 
@@ -35,6 +41,8 @@ class AuthService {
     if (!tokenDoc) {
       throw new ApiError(status.NOT_FOUND, 'Token not found');
     }
+    await cacheService.flushAll();
+
     return tokenDoc;
   }
 
@@ -44,10 +52,16 @@ class AuthService {
   async refreshAuthTokens(refreshToken) {
     try {
       const tokenDoc = await tokenService.verifyToken(refreshToken, 'refresh');
+
+      if (!tokenDoc || !tokenDoc.user) {
+        throw new ApiError(status.UNAUTHORIZED, 'Invalid refresh token');
+      }
+
       const user = await userService.getUserById(tokenDoc.user);
       if (!user) {
-        throw new Error();
+        throw new ApiError(status.UNAUTHORIZED, 'User not found');
       }
+
       await authRepository.removeToken(refreshToken, 'refresh');
       return tokenService.generateAuthTokens(user);
     } catch (error) {

@@ -2,6 +2,7 @@ const ApiError = require('../utils/ApiError');
 const { status } = require('http-status');
 const userRepository = require('../repositories/user.repository');
 const { hashPassword } = require('../utils/password');
+const cacheService = require('./cache.service');
 
 class UserService {
   async createUser(userData) {
@@ -13,6 +14,13 @@ class UserService {
   }
 
   async getUserById(id) {
+    const cacheKey = `user:${id}`;
+
+    const cachedUser = await cacheService.get(cacheKey);
+    if (cachedUser) {
+      return cachedUser;
+    }
+
     const user = await userRepository.getUserById(id);
     if (!user) {
       throw new ApiError(status.NOT_FOUND, 'User not found');
@@ -21,6 +29,14 @@ class UserService {
   }
 
   async getUserByEmail(email) {
+    const cacheKey = `user:email:${email}`;
+
+    const cachedUser = await cacheService.get(cacheKey);
+    if (cachedUser) {
+      cachedUser.id = cachedUser._id;
+      return cachedUser;
+    }
+
     const user = await userRepository.getUserByEmail(email);
     if (!user) {
       throw new ApiError(status.NOT_FOUND, 'User not found');
@@ -40,19 +56,45 @@ class UserService {
     if (!updatedUser) {
       throw new ApiError(status.NOT_FOUND, 'User not found');
     }
+
+    await cacheService.set(`user:${id}`, updatedUser);
+    if (updatedUser.email) {
+      await cacheService.set(`user:email:${updatedUser.email}`, updatedUser);
+    }
+    await cacheService.deleteByPattern('users:*');
+
     return updatedUser;
   }
 
   async deleteUser(id) {
-    const deletedUser = await userRepository.deleteUser(id);
-    if (!deletedUser) {
+    const user = await userRepository.getUserById(id);
+    if (!user) {
       throw new ApiError(status.NOT_FOUND, 'User not found');
     }
+    const deletedUser = await userRepository.deleteUser(id);
+
+    await cacheService.delete(`user:${id}`);
+    if (user.email) {
+      await cacheService.delete(`user:email:${user.email}`);
+    }
+    await cacheService.deleteByPattern('users:*');
+
     return deletedUser;
   }
 
-  async queryUsers(queryParams) {
-    return userRepository.queryUsers(queryParams);
+  async queryUsers({ query = {}, sortBy = {}, skip = 0, limit = 10 }) {
+    const cacheKey = `users:${JSON.stringify({ query, sortBy, skip, limit })}`;
+
+    const cachedData = await cacheService.get(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const result = await userRepository.queryUsers({ query, sortBy, skip, limit });
+
+    await cacheService.set(cacheKey, result);
+
+    return result;
   }
 }
 
